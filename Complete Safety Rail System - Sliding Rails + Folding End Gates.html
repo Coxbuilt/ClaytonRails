@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<!-- saved from url=(0066)file:///Users/cris/Downloads/merged_safety_rail_system%20(30).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Safety Rail System - Sliding Rails + Folding End Gates</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        #controls h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 18px;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 8px;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #34495e;
+            font-weight: bold;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            margin: 3px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        button.active {
+            background: #e74c3c;
+        }
+        
+        button.gate-button {
+            background: #27ae60;
+        }
+        
+        button.gate-button:hover {
+            background: #229954;
+        }
+        
+        button.gate-button.folded {
+            background: #f39c12;
+        }
+        
+        button.warning {
+            background: #f39c12;
+        }
+        
+        #operation-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+        
+        #operation-info h4 {
+            margin: 0 0 12px 0;
+            color: #e74c3c;
+            font-size: 16px;
+        }
+        
+        .operation-step {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(231, 76, 60, 0.2);
+            border-radius: 5px;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        #gate-status {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(39, 174, 96, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        #gate-status.folded {
+            background: rgba(241, 196, 15, 0.9);
+            color: #2c3e50;
+        }
+        
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #2c3e50;
+            max-width: 350px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"><canvas width="1515" height="794" style="display: block; width: 1515px; height: 794px;"></canvas></div>
+    
+    <div id="controls">
+        <h3>Complete Safety Rail System</h3>
+        
+        <div class="control-group">
+            <label>Manufacturing Operations:</label>
+            <button onclick="setOperationMode(&#39;home-entry&#39;)" class="warning">Home Entry Mode</button>
+            <button onclick="setOperationMode(&#39;work-mode&#39;)" class="active">Work Protection Mode</button>
+        </div>
+        
+        <div class="control-group">
+            <label>High Side Rail Sections (14' Level):</label>
+            <button id="btn0" onclick="toggleRailSection(0)">Section 1</button>
+            <button id="btn1" onclick="toggleRailSection(1)">Section 2</button>
+            <button id="btn2" onclick="toggleRailSection(2)">Section 3</button>
+            <button id="btn3" onclick="toggleRailSection(3)">Section 4</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Low Side Rail Sections (11.25' Level):</label>
+            <button id="btn4" onclick="toggleRailSection(4)">Section 5</button>
+            <button id="btn5" onclick="toggleRailSection(5)">Section 6</button>
+            <button id="btn6" onclick="toggleRailSection(6)">Section 7</button>
+            <button id="btn7" onclick="toggleRailSection(7)">Section 8</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Folding End Gates:</label>
+            <button id="fixed-gate-btn" onclick="toggleGate(&#39;fixed&#39;)" class="gate-button">Fixed Front Gate</button>
+            <button id="trolley-gate-btn" onclick="toggleGate(&#39;trolley&#39;)" class="gate-button">Trolley Rear Gate</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Home Length &amp; Trolley Position:</label>
+            <button onclick="setHomeLength(40)">40' Home</button>
+            <button onclick="setHomeLength(56)">56' Home</button>
+            <button onclick="setHomeLength(66)">66' Home</button>
+            <button onclick="setHomeLength(76)">76' Home</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Simulation Sequences:</label>
+            <button onclick="simulateHomeEntry()">Simulate Home Entry</button>
+            <button onclick="simulateHomeExit()">Simulate Home Exit</button>
+            <button onclick="demonstrateDeployment()">Deploy All Rails</button>
+        </div>
+        
+        <div class="control-group">
+            <label>View Controls:</label>
+            <button onclick="setView(&#39;overview&#39;)">Overview</button>
+            <button onclick="setView(&#39;side&#39;)">Side View</button>
+            <button onclick="setView(&#39;mechanism&#39;)">Detail View</button>
+            <button onclick="setView(&#39;operation&#39;)">Operation View</button>
+        </div>
+        
+        <div class="control-group">
+            <label>System Reset:</label>
+            <button onclick="resetSystem()">Reset All Systems</button>
+        </div>
+    </div>
+    
+    <div id="operation-info">
+        <h4>Integrated Safety System</h4>
+        <div class="operation-step">
+            <strong>High Side Rails:</strong> 79" tall starting at 11' - dual kick plates at 11' &amp; 14' levels
+        </div>
+        <div class="operation-step">
+            <strong>Low Side Rails:</strong> 45" tall starting at 11' - single kick plate at 11' level
+        </div>
+        <div class="operation-step">
+            <strong>Coverage:</strong> High side protects double-wide roofs (14'), low side protects single-wide roofs (11.25')
+        </div>
+        <div class="operation-step">
+            <strong>End Gates:</strong> Fold UP for home entry clearance, deploy DOWN for fall protection
+        </div>
+        <div class="operation-step">
+            <strong>Manufacturing Flow:</strong> Home enters from trolley end, exits through fixed gate end
+        </div>
+        <div class="operation-step">
+            <strong>Home Entry:</strong> Gates fold UP, rails retract for clearance from trolley end
+        </div>
+        <div class="operation-step">
+            <strong>Work Mode:</strong> Gates deploy DOWN, rails extend for complete fall protection
+        </div>
+    </div>
+    
+    <div id="gate-status" class="gate-status folded">
+        <div id="gateStatusText">Home Entry/Exit Mode - Gates UP, Systems Clear</div>
+    </div>
+    
+    <div id="status">
+        <div id="statusText">Complete safety rail system loaded - gates DOWN in work protection mode</div>
+    </div>
+
+    <script src="./Complete Safety Rail System - Sliding Rails + Folding End Gates_files/three.min.js"></script>
+    
+    <script>
+        // Global variables
+        let scene, camera, renderer;
+        let railSections = [];
+        let fixedGate, trolleyGate, mobileHome;
+        let homePosition = 0;
+        let sectionStates = [false, false, false, false, false, false, false, false];
+        let gateStates = { fixed: 'folded', trolley: 'folded' }; // Start with gates UP (folded)
+        let operationMode = 'home-entry'; // Start in home entry mode (gates UP)
+        
+        // Mouse controls
+        let mouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        let targetRotation = { x: 0.2, y: 0 };
+        let currentRotation = { x: 0.2, y: 0 };
+        
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+            scene.fog = new THREE.Fog(0xf0f0f0, 50, 200);
+            
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(50, 35, 50);
+            
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('container').appendChild(renderer.domElement);
+            
+            // Setup controls
+            setupMouseControls();
+            
+            // Create scene
+            setupLighting();
+            createFactoryFloor();
+            createStructure();
+            createMobileHome();
+            
+            // Start render loop
+            animate();
+            updateStatus("Complete safety rail system loaded - gates DOWN in work protection mode");
+            updateGateStatus();
+        }
+        
+        function setupMouseControls() {
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                mouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (mouseDown) {
+                    let deltaX = e.clientX - mouseX;
+                    let deltaY = e.clientY - mouseY;
+                    
+                    targetRotation.y += deltaX * 0.005;
+                    targetRotation.x += deltaY * 0.005;
+                    targetRotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, targetRotation.x));
+                    
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+            
+            renderer.domElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                let scale = 1 + e.deltaY * 0.001;
+                camera.position.multiplyScalar(scale);
+                camera.position.clampLength(15, 150);
+            });
+        }
+        
+        function setupLighting() {
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            // Main directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(40, 50, 40);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Fill lights
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(-30, 20, -30);
+            scene.add(fillLight);
+        }
+        
+        function createFactoryFloor() {
+            // Factory floor
+            const floorGeometry = new THREE.PlaneGeometry(150, 100);
+            const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Grid
+            const gridHelper = new THREE.GridHelper(100, 50, 0x444444, 0x666666);
+            scene.add(gridHelper);
+            
+            // Factory ceiling structure
+            const ceilingGeometry = new THREE.PlaneGeometry(150, 100);
+            const ceilingMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x666666, 
+                transparent: true, 
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+            ceiling.position.y = 25;
+            ceiling.rotation.x = Math.PI / 2;
+            scene.add(ceiling);
+            
+            // Manufacturing bay markers
+            const bayGeometry = new THREE.BoxGeometry(80, 0.2, 20);
+            const bayMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x3498db, 
+                transparent: true, 
+                opacity: 0.3 
+            });
+            const bay = new THREE.Mesh(bayGeometry, bayMaterial);
+            bay.position.set(0, 0.1, 0);
+            scene.add(bay);
+        }
+        
+        function createStructure() {
+            createIBeams();
+            createRailSections();
+            createFoldingEndGates();
+        }
+        
+        function createIBeams() {
+            const iBeamGeometry = new THREE.BoxGeometry(1.2, 20, 0.8);
+            const iBeamMaterial = new THREE.MeshLambertMaterial({ color: 0x555555 });
+            
+            // High side I-beams (14 feet) - positioned every 20 feet
+            for (let i = 0; i < 5; i++) {
+                const beam = new THREE.Mesh(iBeamGeometry, iBeamMaterial);
+                beam.position.set(-40 + i * 20, 10, -15);
+                beam.castShadow = true;
+                scene.add(beam);
+            }
+            
+            // Low side I-beams (11.25 feet) - positioned every 20 feet
+            const lowBeamGeometry = new THREE.BoxGeometry(1.2, 16, 0.8);
+            for (let i = 0; i < 5; i++) {
+                const beam = new THREE.Mesh(lowBeamGeometry, iBeamMaterial);
+                beam.position.set(-40 + i * 20, 8, 15);
+                beam.castShadow = true;
+                scene.add(beam);
+            }
+            
+            // Ceiling I-beams for folding gate mounting
+            const ceilingBeamGeometry = new THREE.BoxGeometry(1, 2, 20);
+            const ceilingBeamMaterial = new THREE.MeshLambertMaterial({ color: 0x444444 });
+            
+            // Front ceiling beam for fixed gate
+            const frontBeam = new THREE.Mesh(ceilingBeamGeometry, ceilingBeamMaterial);
+            frontBeam.position.set(-40, 24, 0);
+            scene.add(frontBeam);
+            
+            // Rear ceiling beam for trolley gate
+            const rearBeam = new THREE.Mesh(ceilingBeamGeometry, ceilingBeamMaterial);
+            rearBeam.position.set(40, 24, 0);
+            scene.add(rearBeam);
+        }
+        
+        function createRailSections() {
+            railSections = [];
+            
+            // High side sections - positioned to start at 11' level
+            for (let i = 0; i < 4; i++) {
+                const section = createSlidingRailSection(11, true); // Mount at 11' level
+                section.position.set(-30 + i * 20, 0, -15);
+                section.userData.index = i;
+                section.userData.deployed = false;
+                section.userData.height = 11; // Start height at 11'
+                railSections.push(section);
+                scene.add(section);
+            }
+            
+            // Low side sections - positioned to start at 11' level  
+            for (let i = 0; i < 4; i++) {
+                const section = createSlidingRailSection(11, false); // Mount at 11' level
+                section.position.set(-30 + i * 20, 0, 15);
+                section.userData.index = i + 4;
+                section.userData.deployed = false;
+                section.userData.height = 11; // Start height at 11'
+                railSections.push(section);
+                scene.add(section);
+            }
+        }
+        
+        function createSlidingRailSection(mountHeight, isHighSide) {
+            const sectionGroup = new THREE.Group();
+            
+            // Mounting bracket on I-beam
+            const bracketGeometry = new THREE.BoxGeometry(0.8, 2, 1.5);
+            const bracketMaterial = new THREE.MeshLambertMaterial({ color: 0x444444 });
+            const bracket = new THREE.Mesh(bracketGeometry, bracketMaterial);
+            bracket.position.set(0, mountHeight * 0.9, 0);
+            sectionGroup.add(bracket);
+            
+            // Sliding track
+            const trackGeometry = new THREE.BoxGeometry(0.4, 0.4, 8);
+            const trackMaterial = new THREE.MeshLambertMaterial({ color: 0x666666 });
+            const track = new THREE.Mesh(trackGeometry, trackMaterial);
+            track.position.set(0, mountHeight * 0.9, 0);
+            sectionGroup.add(track);
+            
+            // Sliding carriage - positioned so rail assembly starts at 11' level
+            const carriageGroup = new THREE.Group();
+            carriageGroup.position.set(0, 11, 0); // Fixed at 11-foot level for both sides
+            
+            // Carriage housing
+            const carriageGeometry = new THREE.BoxGeometry(0.6, 0.6, 1.2);
+            const carriageMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
+            const carriage = new THREE.Mesh(carriageGeometry, carriageMaterial);
+            carriageGroup.add(carriage);
+            
+            // Rail assembly attached to carriage - starts at 11' level regardless of side
+            const railAssembly = createRailAssembly(isHighSide);
+            railAssembly.position.set(0, 0, 2.5); // Forward from carriage, at same height
+            carriageGroup.add(railAssembly);
+            
+            sectionGroup.add(carriageGroup);
+            
+            // Cable system
+            const cableGeometry = new THREE.CylinderGeometry(0.05, 0.05, 6);
+            const cableMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
+            const cable = new THREE.Mesh(cableGeometry, cableMaterial);
+            cable.position.set(-2, mountHeight * 0.7, 0);
+            cable.rotation.x = Math.PI / 2;
+            sectionGroup.add(cable);
+            
+            // Store references
+            sectionGroup.userData = {
+                carriageGroup: carriageGroup,
+                railAssembly: railAssembly,
+                cable: cable
+            };
+            
+            return sectionGroup;
+        }
+        
+        function createRailAssembly(isHighSide) {
+            const assemblyGroup = new THREE.Group();
+            
+            // Horizontal support structure - 20 feet long
+            const supportGeometry = new THREE.BoxGeometry(20, 0.3, 0.3);
+            const supportMaterial = new THREE.MeshLambertMaterial({ color: 0x444444 });
+            
+            const mainSupport = new THREE.Mesh(supportGeometry, supportMaterial);
+            mainSupport.position.set(0, 0, 0);
+            assemblyGroup.add(mainSupport);
+            
+            // Vertical posts at ends - both start at 11' level
+            const postHeight = isHighSide ? 6.6 : 3.75; // 79" (6.6') or 45" (3.75')
+            const postGeometry = new THREE.BoxGeometry(0.2, postHeight, 0.2);
+            const postMaterial = new THREE.MeshLambertMaterial({ color: 0x444444 });
+            
+            const post1 = new THREE.Mesh(postGeometry, postMaterial);
+            post1.position.set(-9.9, postHeight / 2, 0); // Center post at correct height
+            assemblyGroup.add(post1);
+            
+            const post2 = new THREE.Mesh(postGeometry, postMaterial);
+            post2.position.set(9.9, postHeight / 2, 0);
+            assemblyGroup.add(post2);
+            
+            // Horizontal safety rails (yellow) - 20 feet long
+            const railGeometry = new THREE.BoxGeometry(20, 0.15, 0.15);
+            const railMaterial = new THREE.MeshLambertMaterial({ color: 0xffeb3b });
+            
+            if (isHighSide) {
+                // HIGH SIDE: 79" tall with rails at multiple levels for double-wide protection
+                // Top rail (79" above 11' = 17.58')
+                const topRail = new THREE.Mesh(railGeometry, railMaterial);
+                topRail.position.set(0, 6.6, 0); // 79" above base
+                assemblyGroup.add(topRail);
+                
+                // Upper mid rail (for 14' level protection - 42" above 14' level)
+                const upperMidRail = new THREE.Mesh(railGeometry, railMaterial);
+                upperMidRail.position.set(0, 5.5, 0); // Around 3' above 14' level
+                assemblyGroup.add(upperMidRail);
+                
+                // Lower mid rail (for 11' level protection - 42" above 11' level)
+                const lowerMidRail = new THREE.Mesh(railGeometry, railMaterial);
+                lowerMidRail.position.set(0, 3.5, 0); // 42" above 11' level
+                assemblyGroup.add(lowerMidRail);
+                
+                // Bottom rail (18" above 11' level)
+                const bottomRail = new THREE.Mesh(railGeometry, railMaterial);
+                bottomRail.position.set(0, 1.5, 0); // 18" above base
+                assemblyGroup.add(bottomRail);
+            } else {
+                // LOW SIDE: 45" tall for single-wide protection
+                // Top rail (45" above 11' level)
+                const topRail = new THREE.Mesh(railGeometry, railMaterial);
+                topRail.position.set(0, 3.75, 0); // 45" above base
+                assemblyGroup.add(topRail);
+                
+                // Mid rail (21" above 11' level)
+                const midRail = new THREE.Mesh(railGeometry, railMaterial);
+                midRail.position.set(0, 1.75, 0);
+                assemblyGroup.add(midRail);
+            }
+            
+            // Kick plates (red) - different configurations for each side
+            const kickPlateGeometry = new THREE.BoxGeometry(20, 0.33, 0.1); // 4" height
+            const kickPlateMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+            
+            if (isHighSide) {
+                // HIGH SIDE: Two kick plates for dual-level protection
+                // Upper kick plate at 14' level (3' above 11' base)
+                const upperKickPlate = new THREE.Mesh(kickPlateGeometry, kickPlateMaterial);
+                upperKickPlate.position.set(0, 3.0, 0); // At 14' roof level
+                assemblyGroup.add(upperKickPlate);
+                
+                // Lower kick plate at 11' level (base level)
+                const lowerKickPlate = new THREE.Mesh(kickPlateGeometry, kickPlateMaterial);
+                lowerKickPlate.position.set(0, 0.165, 0); // Just above 11' level
+                assemblyGroup.add(lowerKickPlate);
+            } else {
+                // LOW SIDE: Single kick plate at 11' level
+                const kickPlate = new THREE.Mesh(kickPlateGeometry, kickPlateMaterial);
+                kickPlate.position.set(0, 0.165, 0); // Just above 11' level
+                assemblyGroup.add(kickPlate);
+            }
+            
+            return assemblyGroup;
+        }
+        
+        function createFoldingEndGates() {
+            // Fixed front gate (folds up to ceiling)
+            fixedGate = createFoldingGate('fixed', -40, 0x27ae60);
+            scene.add(fixedGate);
+            
+            // Trolley rear gate (folds up to ceiling)
+            trolleyGate = createFoldingGate('trolley', 40, 0xe67e22);
+            scene.add(trolleyGate);
+        }
+        
+        function createFoldingGate(type, xPosition, color) {
+            const gateGroup = new THREE.Group();
+            gateGroup.position.x = xPosition;
+            
+            // Ceiling mounting system
+            const ceilingMountGeometry = new THREE.BoxGeometry(3, 1.5, 16);
+            const ceilingMountMaterial = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
+            const ceilingMount = new THREE.Mesh(ceilingMountGeometry, ceilingMountMaterial);
+            ceilingMount.position.set(0, 23.25, 0);
+            gateGroup.add(ceilingMount);
+            
+            // Heavy-duty ceiling anchors
+            const anchorGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1);
+            const anchorMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
+            
+            for (let i = 0; i < 8; i++) {
+                const anchor = new THREE.Mesh(anchorGeometry, anchorMaterial);
+                anchor.position.set(-1 + i * 0.3, 24, -6 + (i % 2) * 12);
+                gateGroup.add(anchor);
+            }
+            
+            // Reinforced hinge mounting brackets
+            const hingeBracketGeometry = new THREE.BoxGeometry(1.5, 1, 2.5);
+            const hingeBracketMaterial = new THREE.MeshLambertMaterial({ color: 0x34495e });
+            
+            const bracketLeft = new THREE.Mesh(hingeBracketGeometry, hingeBracketMaterial);
+            bracketLeft.position.set(0, 22.5, -7.5);
+            gateGroup.add(bracketLeft);
+            
+            const bracketRight = new THREE.Mesh(hingeBracketGeometry, hingeBracketMaterial);
+            bracketRight.position.set(0, 22.5, 7.5);
+            gateGroup.add(bracketRight);
+            
+            // Heavy-duty ceiling hinges
+            const hingeGeometry = new THREE.CylinderGeometry(0.4, 0.4, 2.5);
+            const hingeMaterial = new THREE.MeshLambertMaterial({ color: 0x8e44ad });
+            
+            const hingeLeft = new THREE.Mesh(hingeGeometry, hingeMaterial);
+            hingeLeft.rotation.x = Math.PI / 2;
+            hingeLeft.position.set(0, 22.5, -7.5);
+            gateGroup.add(hingeLeft);
+            
+            const hingeRight = new THREE.Mesh(hingeGeometry, hingeMaterial);
+            hingeRight.rotation.x = Math.PI / 2;
+            hingeRight.position.set(0, 22.5, 7.5);
+            gateGroup.add(hingeRight);
+            
+            // Hydraulic actuators
+            const actuatorGeometry = new THREE.CylinderGeometry(0.3, 0.3, 3);
+            const actuatorMaterial = new THREE.MeshLambertMaterial({ color: 0xe67e22 });
+            
+            const actuator1 = new THREE.Mesh(actuatorGeometry, actuatorMaterial);
+            actuator1.position.set(0, 20, -5);
+            gateGroup.add(actuator1);
+            
+            const actuator2 = new THREE.Mesh(actuatorGeometry, actuatorMaterial);
+            actuator2.position.set(0, 20, 5);
+            gateGroup.add(actuator2);
+            
+            // Gate assembly that rotates (hangs from ceiling) - START UP (horizontal/parallel to ceiling)
+            const gateAssembly = new THREE.Group();
+            gateAssembly.position.set(0, 22, 0);
+            // Set initial rotation to make gates horizontal (parallel to ceiling/floor)
+            if (type === 'fixed') {
+                gateAssembly.rotation.z = Math.PI / 2; // Horizontal position for front gate
+            } else {
+                gateAssembly.rotation.z = -Math.PI / 2; // Horizontal position for rear gate
+            }
+            
+            // Main gate frame (79" tall, starting at 11' minimum)
+            const frameGeometry = new THREE.BoxGeometry(0.5, 6.6, 0.4);
+            const frameMaterial = new THREE.MeshLambertMaterial({ color: color });
+            
+            // Gate posts
+            const post1 = new THREE.Mesh(frameGeometry, frameMaterial);
+            post1.position.set(0, -3.3, -7);
+            gateAssembly.add(post1);
+            
+            const post2 = new THREE.Mesh(frameGeometry, frameMaterial);
+            post2.position.set(0, -3.3, 7);
+            gateAssembly.add(post2);
+            
+            // Horizontal safety rails
+            const railGeometry = new THREE.BoxGeometry(0.15, 0.15, 14);
+            const railMaterial = new THREE.MeshLambertMaterial({ color: 0xffeb3b });
+            
+            const railHeights = [-0.5, -2, -3.5, -5, -6.1];
+            railHeights.forEach(height => {
+                const rail = new THREE.Mesh(railGeometry, railMaterial);
+                rail.position.set(0, height, 0);
+                gateAssembly.add(rail);
+            });
+            
+            // Kick plates at roof levels
+            const kickPlateGeometry = new THREE.BoxGeometry(0.1, 0.33, 14);
+            const kickPlateMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+            
+            // Upper kick plate (14'-0" level)
+            const upperKickPlate = new THREE.Mesh(kickPlateGeometry, kickPlateMaterial);
+            upperKickPlate.position.set(0, -8, 0);
+            gateAssembly.add(upperKickPlate);
+            
+            // Lower kick plate (11'-3" level) 
+            const lowerKickPlate = new THREE.Mesh(kickPlateGeometry, kickPlateMaterial);
+            lowerKickPlate.position.set(0, -10.75, 0);
+            gateAssembly.add(lowerKickPlate);
+            
+            // Bottom reinforcement
+            const bottomBeamGeometry = new THREE.BoxGeometry(0.4, 0.4, 14);
+            const bottomBeamMaterial = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
+            const bottomBeam = new THREE.Mesh(bottomBeamGeometry, bottomBeamMaterial);
+            bottomBeam.position.set(0, -11, 0);
+            gateAssembly.add(bottomBeam);
+            
+            gateGroup.add(gateAssembly);
+            
+            // Store references
+            gateGroup.userData.assembly = gateAssembly;
+            gateGroup.userData.type = type;
+            gateGroup.userData.actuators = [actuator1, actuator2];
+            
+            return gateGroup;
+        }
+        
+        function createMobileHome() {
+            const homeGeometry = new THREE.BoxGeometry(40, 1.5, 14);
+            const homeMaterial = new THREE.MeshLambertMaterial({ color: 0xd4d4aa });
+            mobileHome = new THREE.Mesh(homeGeometry, homeMaterial);
+            mobileHome.position.set(-20, 0.75, 0);
+            mobileHome.castShadow = true;
+            scene.add(mobileHome);
+            
+            // Roof
+            const roofGeometry = new THREE.BoxGeometry(42, 0.3, 15);
+            const roofMaterial = new THREE.MeshLambertMaterial({ color: 0x654321 });
+            const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+            roof.position.set(0, 1.4, 0);
+            mobileHome.add(roof);
+        }
+        
+        // Control functions
+        function toggleRailSection(index) {
+            if (index < 0 || index >= 8 || !railSections[index]) {
+                console.error(`Invalid rail section index: ${index}`);
+                return;
+            }
+            
+            const section = railSections[index];
+            const deployed = !sectionStates[index];
+            sectionStates[index] = deployed;
+            
+            // Restore smooth animation for rails
+            animateRailSmooth(section, deployed, index);
+            
+            const button = document.getElementById(`btn${index}`);
+            if (button) {
+                button.classList.toggle('active', deployed);
+            }
+            
+            const sideType = index < 4 ? 'High Side' : 'Low Side';
+            const sectionNum = (index % 4) + 1;
+            updateStatus(`${sideType} Section ${sectionNum} ${deployed ? 'extending toward roof' : 'retracting away from roof'}`);
+        }
+        
+        function animateRailSmooth(section, deploy, index) {
+            if (!section || !section.userData || !section.userData.carriageGroup) {
+                console.error('Invalid section for animation');
+                return;
+            }
+            
+            const duration = 2000;
+            const startTime = Date.now();
+            const carriageGroup = section.userData.carriageGroup;
+            const isHighSide = index < 4;
+            
+            const startZ = carriageGroup.position.z;
+            let endZ;
+            
+            if (deploy) {
+                // Extended position: toward roof
+                endZ = isHighSide ? 6 : -6; // High side +6, Low side -6
+            } else {
+                // Retracted position: away from roof
+                endZ = 0;
+            }
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+                
+                const currentZ = startZ + (endZ - startZ) * easeProgress;
+                carriageGroup.position.z = currentZ;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        function toggleGate(gateType) {
+            const gate = gateType === 'fixed' ? fixedGate : trolleyGate;
+            const currentState = gateStates[gateType];
+            const newState = currentState === 'deployed' ? 'folded' : 'deployed';
+            
+            // Restore smooth animation for gates
+            animateGateSmooth(gate, newState);
+            gateStates[gateType] = newState;
+            
+            // Update button appearance
+            const button = document.getElementById(`${gateType}-gate-btn`);
+            if (button) {
+                button.classList.toggle('folded', newState === 'folded');
+                button.textContent = `${gateType === 'fixed' ? 'Fixed Front' : 'Trolley Rear'} Gate (${newState})`;
+            }
+            
+            updateGateStatus();
+            const position = newState === 'folded' ? 'UP (horizontal)' : 'DOWN (vertical)';
+            updateStatus(`${gateType} gate moving ${position}`);
+        }
+        
+        function animateGateSmooth(gate, targetState) {
+            const duration = 2000;
+            const startTime = Date.now();
+            const assembly = gate.userData.assembly;
+            const gateType = gate.userData.type;
+            
+            const startRotation = assembly.rotation.z;
+            let endRotation;
+            
+            if (targetState === 'folded') {
+                // FOLDED = horizontal position, folded AWAY from home
+                if (gateType === 'fixed') {
+                    endRotation = -Math.PI / 2; // Fixed gate folds toward factory exterior
+                } else {
+                    endRotation = Math.PI / 2; // Trolley gate folds toward factory exterior
+                }
+            } else {
+                // DEPLOYED = vertical position for protection
+                endRotation = 0;
+            }
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+                
+                const currentRotation = startRotation + (endRotation - startRotation) * easeProgress;
+                assembly.rotation.z = currentRotation;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        function animateSliding(section, deploy) {
+            if (!section || !section.userData || !section.userData.carriageGroup) {
+                console.error('Invalid section for animation');
+                return;
+            }
+            
+            const duration = 2000;
+            const startTime = Date.now();
+            // COMPLETELY REVERSED: The state mapping was backwards
+            // What actually happens vs what we want:
+            // - When targetState = 'deployed', gates were going UP (wrong)
+            // - When targetState = 'folded', gates were going DOWN (wrong)
+            // So we need to flip the entire mapping:
+            
+            if (gateType === 'fixed') {
+                if (targetState === 'folded') {
+                    // FOLDED should = DOWN/vertical (work protection) - REVERSED
+                    startRotation = Math.PI / 2; // From horizontal UP
+                    endRotation = 0; // To vertical DOWN
+                } else {
+                    // DEPLOYED should = UP/horizontal (home entry) - REVERSED  
+                    startRotation = 0; // From vertical DOWN
+                    endRotation = Math.PI / 2; // To horizontal UP
+                }
+            } else {
+                if (targetState === 'folded') {
+                    // FOLDED should = DOWN/vertical (work protection) - REVERSED
+                    startRotation = -Math.PI / 2; // From horizontal UP
+                    endRotation = 0; // To vertical DOWN
+                } else {
+                    // DEPLOYED should = UP/horizontal (home entry) - REVERSED
+                    startRotation = 0; // From vertical DOWN
+                    endRotation = -Math.PI / 2; // To horizontal UP
+                }
+            }
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+                
+                const currentZ = startZ + (endZ - startZ) * easeProgress;
+                
+                if (section.userData.carriageGroup && section.userData.carriageGroup.position) {
+                    section.userData.carriageGroup.position.z = currentZ;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        function animateGate(gate, targetState) {
+            const duration = 2000;
+            const startTime = Date.now();
+            const assembly = gate.userData.assembly;
+            const gateType = gate.userData.type;
+            
+            let startRotation, endRotation;
+            
+            // FIXED: Reverse the state mapping to match actual behavior
+            // What we WANT: "deployed" = DOWN (work protection), "folded" = UP (home entry)
+            // But animation was backwards, so we need to reverse the mapping
+            
+            if (gateType === 'fixed') {
+                if (targetState === 'deployed') {
+                    // DEPLOYED = DOWN for work protection (-90°)
+                    startRotation = 0; // From UP
+                    endRotation = -Math.PI / 2; // To DOWN
+                } else {
+                    // FOLDED = UP for home entry (0°)
+                    startRotation = -Math.PI / 2; // From DOWN  
+                    endRotation = 0; // To UP
+                }
+            } else {
+                if (targetState === 'deployed') {
+                    // DEPLOYED = DOWN for work protection (90°)
+                    startRotation = 0; // From UP
+                    endRotation = Math.PI / 2; // To DOWN
+                } else {
+                    // FOLDED = UP for home entry (0°)
+                    startRotation = Math.PI / 2; // From DOWN
+                    endRotation = 0; // To UP
+                }
+            }
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+                
+                const currentRotation = startRotation + (endRotation - startRotation) * easeProgress;
+                assembly.rotation.z = currentRotation;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        function setOperationMode(mode) {
+            operationMode = mode;
+            
+            // Update button visual states
+            const homeButton = document.querySelector('[onclick="setOperationMode(\'home-entry\')"]');
+            const workButton = document.querySelector('[onclick="setOperationMode(\'work-mode\')"]');
+            
+            if (mode === 'home-entry') {
+                homeButton.className = 'active';
+                workButton.className = 'warning';
+                
+                // HOME ENTRY: Gates UP, Rails RETRACTED (open for home movement)
+                if (gateStates.fixed === 'deployed') toggleGate('fixed');
+                if (gateStates.trolley === 'deployed') toggleGate('trolley');
+                
+                // Retract all rail sections (open position)
+                for (let i = 0; i < 8; i++) {
+                    if (sectionStates[i]) {
+                        console.log(`Retracting rail section ${i}`);
+                        toggleRailSection(i);
+                    }
+                }
+                
+                updateStatus("Home entry mode - gates UP, rails OPEN for home movement");
+            } else {
+                homeButton.className = 'warning';
+                workButton.className = 'active';
+                
+                // WORK PROTECTION: Gates DOWN, Rails EXTENDED (closed for protection)
+                if (gateStates.fixed === 'folded') toggleGate('fixed');
+                if (gateStates.trolley === 'folded') toggleGate('trolley');
+                
+                // Force ALL rail sections to extended position for work protection
+                for (let i = 0; i < 8; i++) {
+                    console.log(`Checking rail section ${i}: currently ${sectionStates[i] ? 'extended' : 'retracted'}`);
+                    if (!sectionStates[i]) {
+                        console.log(`Extending rail section ${i}`);
+                        toggleRailSection(i);
+                    } else {
+                        console.log(`Rail section ${i} already extended`);
+                    }
+                }
+                
+                updateStatus("Work protection mode - gates DOWN, rails CLOSED for safety");
+            }
+            
+            updateGateStatus();
+        }
+        
+        function simulateHomeEntry() {
+            updateStatus("Starting home entry simulation...");
+            
+            // Step 1: Position home and animate gates to UP position
+            mobileHome.position.x = 60;
+            
+            // Animate gates to UP position if they're not already there
+            if (gateStates.fixed === 'deployed') toggleGate('fixed');
+            if (gateStates.trolley === 'deployed') toggleGate('trolley');
+            
+            // Retract all rails with animation
+            for (let i = 0; i < 8; i++) {
+                if (sectionStates[i]) toggleRailSection(i);
+            }
+            
+            updateStatus("Gates folding UP, rails retracting - preparing for home entry...");
+            
+            // Step 2: Wait for gate/rail animations, then move home
+            setTimeout(() => {
+                animateHomeMovement(-20, 3000);
+                updateStatus("Home entering bay with gates UP for safe clearance");
+            }, 3000); // Wait for gate animations to complete
+            
+            // Step 3: After home parks, animate gates DOWN
+            setTimeout(() => {
+                updateStatus("Home parked - gates deploying DOWN for worker protection");
+                if (gateStates.fixed === 'folded') toggleGate('fixed');
+                if (gateStates.trolley === 'folded') toggleGate('trolley');
+            }, 7000);
+            
+            // Step 4: Animate rails extending to roof
+            setTimeout(() => {
+                updateStatus("Gates DOWN - extending safety rails to roof position");
+                demonstrateDeployment();
+            }, 10000);
+            
+            setTimeout(() => {
+                updateStatus("Complete protection: Gates DOWN + Rails extended to roof");
+            }, 14000);
+        }
+        
+        function simulateHomeExit() {
+            updateStatus("Simulating home exit sequence...");
+            
+            // Step 1: Retract rails OUTWARD away from roof
+            updateStatus("Retracting safety rails away from roof...");
+            for (let i = 0; i < 8; i++) {
+                if (sectionStates[i]) toggleRailSection(i);
+            }
+            
+            // Step 2: Fold gates UP for exit clearance
+            setTimeout(() => {
+                updateStatus("Rails retracted - folding gates UP for exit clearance");
+                if (gateStates.fixed === 'deployed') toggleGate('fixed');
+                if (gateStates.trolley === 'deployed') toggleGate('trolley');
+            }, 2000);
+            
+            // Step 3: Home exits through fixed gate end
+            setTimeout(() => {
+                updateStatus("Gates UP - home exiting through fixed gate end...");
+                animateHomeMovement(-60, 3000);
+            }, 4000);
+            
+            // Step 4: Reset for next cycle
+            setTimeout(() => {
+                updateStatus("Home exited - resetting for next entry cycle");
+                animateHomeMovement(-20, 1000);
+            }, 8000);
+        }
+        
+        function animateHomeMovement(targetX, duration) {
+            const startTime = Date.now();
+            const startX = mobileHome.position.x;
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+                
+                const currentX = startX + (targetX - startX) * easeProgress;
+                mobileHome.position.x = currentX;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        function demonstrateDeployment() {
+            updateStatus("Deploying all sliding rail sections...");
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    if (!sectionStates[i]) {
+                        toggleRailSection(i);
+                    }
+                }, i * 400); // Slightly faster sequence for 8 sections
+            }
+        }
+        
+        function resetSystem() {
+            // Reset gates to deployed position
+            if (gateStates.fixed === 'folded') toggleGate('fixed');
+            if (gateStates.trolley === 'folded') toggleGate('trolley');
+            
+            // Reset rail sections to retracted
+            for (let i = 0; i < 8; i++) {
+                if (sectionStates[i]) toggleRailSection(i);
+            }
+            
+            // Reset home position
+            mobileHome.position.x = -20;
+            
+            operationMode = 'work-mode';
+            updateGateStatus();
+            updateStatus("All systems reset - ready for operation");
+        }
+        
+        function setHomeLength(length) {
+            if (!mobileHome) return;
+            
+            // Resize mobile home geometry
+            mobileHome.scale.x = length / 40;
+            
+            // Position home so front stays at fixed end gate
+            const homeCenter = -40 + (length / 2);
+            mobileHome.position.x = homeCenter;
+            
+            // Position trolley gate at rear of home
+            const gatePositions = {
+                40: 0,
+                56: 16,
+                66: 26,
+                76: 36
+            };
+            
+            const targetPosition = gatePositions[length] || 0;
+            
+            if (trolleyGate) {
+                trolleyGate.position.x = targetPosition;
+            }
+            
+            updateStatus(`${length}' home configured - Trolley gate positioned at rear`);
+        }
+        
+        function setView(viewType) {
+            switch(viewType) {
+                case 'overview':
+                    targetRotation.x = 0.2;
+                    targetRotation.y = 0;
+                    camera.position.set(50, 35, 50);
+                    break;
+                case 'side':
+                    targetRotation.x = 0;
+                    targetRotation.y = Math.PI / 2;
+                    camera.position.set(0, 25, 60);
+                    break;
+                case 'mechanism':
+                    targetRotation.x = 0.1;
+                    targetRotation.y = -0.3;
+                    camera.position.set(20, 15, 25);
+                    break;
+                case 'operation':
+                    targetRotation.x = 0.3;
+                    targetRotation.y = 1.2;
+                    camera.position.set(-30, 25, 30);
+                    break;
+            }
+            updateStatus(`View: ${viewType}`);
+        }
+        
+        function updateGateStatus() {
+            const statusElement = document.getElementById('gate-status');
+            const textElement = document.getElementById('gateStatusText');
+            
+            const fixedState = gateStates.fixed;
+            const trolleyState = gateStates.trolley;
+            const railsDeployed = sectionStates.some(state => state);
+            
+            if (fixedState === 'deployed' && trolleyState === 'deployed') {
+                if (railsDeployed) {
+                    statusElement.className = 'gate-status';
+                    textElement.textContent = 'Complete Protection - Gates DOWN + Rails Extended';
+                } else {
+                    statusElement.className = 'gate-status';
+                    textElement.textContent = 'Gates Deployed DOWN - Rails Ready for Extension';
+                }
+            } else if (fixedState === 'folded' && trolleyState === 'folded') {
+                statusElement.className = 'gate-status folded';
+                textElement.textContent = 'Home Entry/Exit Mode - Gates UP, Systems Clear';
+            } else {
+                statusElement.className = 'gate-status folded';
+                textElement.textContent = `Mixed State - Gates: ${fixedState}/${trolleyState}`;
+            }
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('statusText').textContent = message;
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Smooth camera rotation
+            currentRotation.x += (targetRotation.x - currentRotation.x) * 0.1;
+            currentRotation.y += (targetRotation.y - currentRotation.y) * 0.1;
+            
+            const radius = camera.position.length();
+            camera.position.x = Math.cos(currentRotation.y) * Math.cos(currentRotation.x) * radius;
+            camera.position.y = Math.sin(currentRotation.x) * radius;
+            camera.position.z = Math.sin(currentRotation.y) * Math.cos(currentRotation.x) * radius;
+            camera.lookAt(0, 10, 0);
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Initialize
+        init();
+    </script>
+
+</body></html>
